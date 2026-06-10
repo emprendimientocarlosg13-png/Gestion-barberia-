@@ -255,8 +255,6 @@ body {
 .btn-danger {
     background: #ef4444;
     color: white;
-    padding: 6px 12px;
-    font-size: 12px;
 }
 
 .btn-danger:hover {
@@ -270,6 +268,11 @@ body {
 
 .btn-secondary:hover {
     background: #d1d5db;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
 }
 
 /* TABLES */
@@ -299,6 +302,41 @@ table td {
 
 table tr:hover {
     background: #f9fafb;
+}
+
+/* ESTADO BADGES */
+.confirmada {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cancelada {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ingresos {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.egresos {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
 }
 
 /* DAY REPORT */
