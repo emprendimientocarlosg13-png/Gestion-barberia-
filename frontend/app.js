@@ -46,7 +46,10 @@ function setupTabNavigation() {
             document.getElementById(tabName).classList.add('active');
             
             // Cargar datos cuando se abre la pestaña
-            if (tabName === 'caja') {
+            if (tabName === 'citas') {
+                loadCitas();
+                cargarClientesEnSelect();
+            } else if (tabName === 'caja') {
                 loadTransacciones();
             } else if (tabName === 'clientes') {
                 loadClientes();
@@ -68,6 +71,7 @@ async function loadDashboard() {
         document.getElementById('total-egresos').textContent = formatCurrency(data.egresos);
         document.getElementById('balance-neto').textContent = formatCurrency(data.balance);
         document.getElementById('total-clientes-count').textContent = data.total_clientes;
+        document.getElementById('proximas-citas-count').textContent = data.proximas_citas || 0;
         
         // Reporte del día
         const dayResponse = await fetch(`${API_URL}/reportes/diario`);
@@ -99,6 +103,183 @@ async function loadDashboard() {
     }
 }
 
+// ========== CITAS ==========
+async function loadCitas() {
+    try {
+        const response = await fetch(`${API_URL}/citas`);
+        const citas = await response.json();
+        
+        const tbody = document.getElementById('citas-body');
+        tbody.innerHTML = '';
+        
+        if (citas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">Sin citas registradas</td></tr>';
+            return;
+        }
+        
+        citas.forEach(c => {
+            const row = document.createElement('tr');
+            const estadoClass = c.estado === 'confirmada' ? 'confirmada' : 'cancelada';
+            
+            row.innerHTML = `
+                <td>${c.fecha_cita}</td>
+                <td>${c.hora_cita}</td>
+                <td>${c.cliente_nombre}</td>
+                <td>${c.servicio}</td>
+                <td><span class="${estadoClass}">${c.estado}</span></td>
+                <td>
+                    <button class="btn btn-secondary btn-small" onclick="enviarRecordatorio(${c.id})">📱 Recordatorio</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteCita(${c.id})">🗑️ Cancelar</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error cargando citas:', error);
+        showAlert('Error cargando citas', 'error');
+    }
+}
+
+async function cargarClientesEnSelect() {
+    try {
+        const response = await fetch(`${API_URL}/clientes`);
+        const clientes = await response.json();
+        
+        const select = document.getElementById('cita-cliente');
+        select.innerHTML = '<option value="">-- Seleccionar cliente --</option>';
+        
+        clientes.forEach(c => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify({id: c.id, nombre: c.nombre, telefono: c.telefono});
+            option.textContent = c.nombre;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando clientes:', error);
+    }
+}
+
+async function cargarHorasDisponibles() {
+    const fecha = document.getElementById('cita-fecha').value;
+    const horaSelect = document.getElementById('cita-hora');
+    
+    if (!fecha) {
+        horaSelect.innerHTML = '<option value="">-- Seleccionar hora --</option>';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/citas/disponibles?fecha=${fecha}`);
+        const data = await response.json();
+        
+        horaSelect.innerHTML = '<option value="">-- Seleccionar hora --</option>';
+        
+        if (data.success && data.horas_disponibles.length > 0) {
+            data.horas_disponibles.forEach(hora => {
+                const option = document.createElement('option');
+                option.value = hora;
+                option.textContent = hora;
+                horaSelect.appendChild(option);
+            });
+        } else {
+            horaSelect.innerHTML = '<option value="">Sin horas disponibles</option>';
+        }
+    } catch (error) {
+        console.error('Error cargando horas:', error);
+    }
+}
+
+async function deleteCita(id) {
+    if (!confirm('¿Estás seguro de que quieres cancelar esta cita?')) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/citas/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showAlert('Cita cancelada');
+            loadCitas();
+            loadDashboard();
+        }
+    } catch (error) {
+        console.error('Error eliminando cita:', error);
+        showAlert('Error al cancelar cita', 'error');
+    }
+}
+
+async function enviarRecordatorio(id) {
+    try {
+        const response = await fetch(`${API_URL}/citas/${id}/recordatorio`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('✅ Recordatorio enviado por WhatsApp');
+        } else {
+            showAlert('⚠️ ' + data.error, 'error');
+        }
+    } catch (error) {
+        console.error('Error enviando recordatorio:', error);
+        showAlert('Error enviando recordatorio', 'error');
+    }
+}
+
+function setupFormCita() {
+    const form = document.getElementById('form-cita');
+    const fechaInput = document.getElementById('cita-fecha');
+    
+    // Establecer fecha mínima
+    const today = new Date().toISOString().split('T')[0];
+    fechaInput.setAttribute('min', today);
+    
+    // Cargar horas cuando cambia la fecha
+    fechaInput.addEventListener('change', cargarHorasDisponibles);
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const clienteData = JSON.parse(document.getElementById('cita-cliente').value);
+        const fecha_cita = document.getElementById('cita-fecha').value;
+        const hora_cita = document.getElementById('cita-hora').value;
+        const servicio = document.getElementById('cita-servicio').value;
+        const notas = document.getElementById('cita-notas').value;
+        
+        if (!clienteData || !fecha_cita || !hora_cita) {
+            showAlert('Por favor completa todos los campos requeridos', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${API_URL}/citas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cliente_id: clienteData.id,
+                    cliente_nombre: clienteData.nombre,
+                    cliente_telefono: clienteData.telefono,
+                    fecha_cita,
+                    hora_cita,
+                    servicio,
+                    notas
+                })
+            });
+            
+            if (response.ok) {
+                showAlert('✅ Cita agendada correctamente');
+                form.reset();
+                loadCitas();
+                loadDashboard();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('Error al agendar cita', 'error');
+        }
+    });
+}
+
 // ========== TRANSACCIONES (CAJA) ==========
 async function loadTransacciones() {
     try {
@@ -124,7 +305,7 @@ async function loadTransacciones() {
                 <td><span class="${tipoClass}">${t.tipo}</span></td>
                 <td><strong>${signo}${formatCurrency(t.monto)}</strong></td>
                 <td>${t.metodo_pago}</td>
-                <td><button class="btn btn-danger" onclick="deleteTransaccion(${t.id})">🗑️ Eliminar</button></td>
+                <td><button class="btn btn-danger btn-small" onclick="deleteTransaccion(${t.id})">🗑️ Eliminar</button></td>
             `;
             tbody.appendChild(row);
         });
@@ -213,7 +394,7 @@ async function loadClientes() {
                 <p><strong>Gustos:</strong></p>
                 <span class="gustos">${c.gustos}</span>
                 <div class="cliente-actions">
-                    <button class="btn btn-secondary" onclick="deleteCliente(${c.id})">🗑️ Eliminar</button>
+                    <button class="btn btn-secondary btn-small" onclick="deleteCliente(${c.id})">🗑️ Eliminar</button>
                 </div>
             `;
             grid.appendChild(card);
@@ -270,6 +451,7 @@ function setupFormCliente() {
                 form.reset();
                 loadClientes();
                 loadDashboard();
+                cargarClientesEnSelect();
             }
         } catch (error) {
             console.error('Error:', error);
@@ -334,6 +516,7 @@ async function loadReportes() {
 // ========== INICIALIZACIÓN ==========
 function init() {
     setupTabNavigation();
+    setupFormCita();
     setupFormTransaccion();
     setupFormCliente();
     loadDashboard();
