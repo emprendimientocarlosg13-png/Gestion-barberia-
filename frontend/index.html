@@ -25,6 +25,7 @@
         <!-- NAVIGATION TABS -->
         <nav class="tabs">
             <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="citas">📅 Citas</button>
             <button class="tab-btn" data-tab="caja">💰 Caja</button>
             <button class="tab-btn" data-tab="clientes">👤 Clientes</button>
             <button class="tab-btn" data-tab="reportes">📈 Reportes</button>
@@ -68,6 +69,14 @@
                             <p class="amount" id="total-clientes-count">0</p>
                         </div>
                     </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon citas">📅</div>
+                        <div class="card-content">
+                            <h3>Citas Próximas</h3>
+                            <p class="amount" id="proximas-citas-count">0</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Reporte del Día -->
@@ -94,6 +103,76 @@
                     <h2>💳 Ingresos por Método de Pago</h2>
                     <div class="metodos-grid" id="metodos-pago-grid">
                         <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CITAS -->
+            <section class="tab-content" id="citas">
+                <div class="card">
+                    <h2>📅 Agendar Nueva Cita</h2>
+                    <form id="form-cita" class="form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cita-cliente">Cliente</label>
+                                <select id="cita-cliente" required>
+                                    <option value="">-- Seleccionar cliente --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cita-fecha">Fecha</label>
+                                <input type="date" id="cita-fecha" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cita-hora">Hora</label>
+                                <select id="cita-hora" required>
+                                    <option value="">-- Seleccionar hora --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="cita-servicio">Servicio</label>
+                                <select id="cita-servicio" required>
+                                    <option value="Corte">Corte</option>
+                                    <option value="Corte y Barba">Corte y Barba</option>
+                                    <option value="Barba">Barba</option>
+                                    <option value="Afeitado">Afeitado</option>
+                                    <option value="Tratamiento">Tratamiento</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cita-notas">Notas</label>
+                            <textarea id="cita-notas" placeholder="Ej: Preferencias especiales..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">✅ Agendar Cita</button>
+                    </form>
+                </div>
+
+                <!-- Lista de Citas -->
+                <div class="card">
+                    <h2>📋 Citas Programadas</h2>
+                    <div class="table-container">
+                        <table id="tabla-citas">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Cliente</th>
+                                    <th>Servicio</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="citas-body">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
