@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maranatha System - Gestión de Barbería</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>💈 Maranatha System</h1>
+                    <p>Gestión de Barbería</p>
+                </div>
+                <div class="status" id="status">
+                    <span class="status-dot online"></span>
+                    <span>Sistema Conectado</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVIGATION TABS -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="caja">💰 Caja</button>
+            <button class="tab-btn" data-tab="clientes">👤 Clientes</button>
+            <button class="tab-btn" data-tab="reportes">📈 Reportes</button>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="content">
+
+            <!-- TAB: DASHBOARD -->
+            <section class="tab-content active" id="dashboard">
+                <div class="dashboard-grid">
+                    <!-- Cards de Resumen -->
+                    <div class="card stats-card">
+                        <div class="card-icon ingresos">💚</div>
+                        <div class="card-content">
+                            <h3>Ingresos Totales</h3>
+                            <p class="amount" id="total-ingresos">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon egresos">❤️</div>
+                        <div class="card-content">
+                            <h3>Egresos Totales</h3>
+                            <p class="amount" id="total-egresos">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon balance">💵</div>
+                        <div class="card-content">
+                            <h3>Balance Neto</h3>
+                            <p class="amount" id="balance-neto">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="card stats-card">
+                        <div class="card-icon clientes">👥</div>
+                        <div class="card-content">
+                            <h3>Total Clientes</h3>
+                            <p class="amount" id="total-clientes-count">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporte del Día -->
+                <div class="card">
+                    <h2>📅 Reporte del Día</h2>
+                    <div class="day-report">
+                        <div class="report-item">
+                            <span>Ingresos Hoy:</span>
+                            <strong id="ingresos-hoy">$0.00</strong>
+                        </div>
+                        <div class="report-item">
+                            <span>Egresos Hoy:</span>
+                            <strong id="egresos-hoy">$0.00</strong>
+                        </div>
+                        <div class="report-item balance-item">
+                            <span>Balance Hoy:</span>
+                            <strong id="balance-hoy">$0.00</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métodos de Pago -->
+                <div class="card">
+                    <h2>💳 Ingresos por Método de Pago</h2>
+                    <div class="metodos-grid" id="metodos-pago-grid">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CAJA -->
+            <section class="tab-content" id="caja">
+                <div class="card">
+                    <h2>💰 Registrar Transacción</h2>
+                    <form id="form-transaccion" class="form">
+                        <div class="form-group">
+                            <label for="desc">Descripción</label>
+                            <input type="text" id="desc" placeholder="Ej: Corte y barba, Compra de productos..." required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="monto">Monto ($)</label>
+                                <input type="number" id="monto" placeholder="0.00" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipo">Tipo</label>
+                                <select id="tipo">
+                                    <option value="Ingreso">Ingreso (Venta)</option>
+                                    <option value="Egreso">Egreso (Gasto)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="metodo">Método de Pago</label>
+                                <select id="metodo">
+                                    <option value="EFECTIVO">Efectivo</option>
+                                    <option value="PAGO MOVIL">Pago Móvil</option>
+                                    <option value="DIVISAS">Divisas</option>
+                                    <option value="TRANSFERENCIA">Transferencia</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">✅ Guardar Transacción</button>
+                    </form>
+                </div>
+
+                <!-- Historial de Transacciones -->
+                <div class="card">
+                    <h2>📋 Historial de Transacciones</h2>
+                    <div class="table-container">
+                        <table id="tabla-transacciones">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Tipo</th>
+                                    <th>Monto</th>
+                                    <th>Método</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transacciones-body">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CLIENTES -->
+            <section class="tab-content" id="clientes">
+                <div class="card">
+                    <h2>👤 Registrar Nuevo Cliente</h2>
+                    <form id="form-cliente" class="form">
+                        <div class="form-group">
+                            <label for="nombre">Nombre Completo</label>
+                            <input type="text" id="nombre" placeholder="Ej: Carlos Pérez" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="telefono">Teléfono</label>
+                                <input type="tel" id="telefono" placeholder="Ej: +58 412 1112233" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gustos">Gustos / Preferencias</label>
+                                <input type="text" id="gustos" placeholder="Ej: Degradado alto, corte militar..." required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">✅ Registrar Cliente</button>
+                    </form>
+                </div>
+
+                <!-- Lista de Clientes -->
+                <div class="card">
+                    <h2>📱 Clientes Registrados</h2>
+                    <div class="clientes-grid" id="clientes-grid">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: REPORTES -->
+            <section class="tab-content" id="reportes">
+                <div class="card">
+                    <h2>📈 Análisis y Reportes</h2>
+                    <div class="reportes-grid">
+                        <div class="reporte-box">
+                            <h3>📊 Resumen General</h3>
+                            <div class="resumen-items">
+                                <div class="resumen-item">
+                                    <span>Total Ingresos:</span>
+                                    <strong id="rep-ingresos">$0.00</strong>
+                                </div>
+                                <div class="resumen-item">
+                                    <span>Total Egresos:</span>
+                                    <strong id="rep-egresos">$0.00</strong>
+                                </div>
+                                <div class="resumen-item balance-item">
+                                    <span>Balance Neto:</span>
+                                    <strong id="rep-balance">$0.00</strong>
+                                </div>
+                                <div class="resumen-item">
+                                    <span>Clientes Totales:</span>
+                                    <strong id="rep-clientes">0</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reporte-box">
+                            <h3>💳 Desglose de Métodos</h3>
+                            <div id="metodos-reporte">
+                                <!-- Se llena dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔄 Últimas 10 Transacciones</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Tipo</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ultimas-transacciones">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>© 2024 Maranatha System | Gestión de Barbería | Todos los derechos reservados</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
